@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hisaab Counter 🏸</title>
+
+    <!-- PWA / tab appearance -->
+    <meta name="theme-color" content="#080810" />
+    <meta name="application-name" content="Hisaab Counter" />
+    <meta name="description" content="Group expense & dues tracker" />
+
+    <!-- Favicon — inline SVG as data URI so no extra files needed -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23080810'/><text y='48' x='6' font-size='48'>🏸</text></svg>" />
+
+    <!-- Open Graph (looks great when shared on WhatsApp etc.) -->
+    <meta property="og:title" content="Hisaab Counter" />
+    <meta property="og:description" content="Group badminton & expense tracker" />
+    <meta property="og:type" content="website" />
+
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #080810; }
+      input:focus { outline: none; }
+      input[type=number]::-webkit-inner-spin-button,
+      input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+      ::-webkit-scrollbar { width: 4px; height: 4px; }
+      ::-webkit-scrollbar-track { background: #080810; }
+      ::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,251 @@
+import { db } from "./firebase";
+import { ref, update } from "firebase/database";
+
+const PEOPLE_COLORS = {
+  Priyam:    "#FF6B6B",
+  Saloni:    "#FF85A1",
+  Devansh:   "#5BC0EB",
+  Khushi:    "#FFD166",
+  Bharat:    "#06D6A0",
+  Vansh:     "#A78BFA",
+  Chehak:    "#F97316",
+  Ashutosh:  "#94A3B8",
+  Aditi:     "#FB923C",
+  Kirtan:    "#818CF8",
+  Samarth:   "#34D399",
+  Anni:      "#F472B6",
+};
+
+const SEED_DATA = {
+
+  Priyam: [
+    { date: "2026-03-06", desc: "Past dues before 5 Mar (120+250+40)", amount: 410,  type: "debit",  category: "misc" },
+    { date: "2026-03-15", desc: "Payment",                              amount: 170,  type: "credit", category: "payment" },
+    { date: "2026-03-20", desc: "Badminton",                            amount: 225,  type: "debit",  category: "badminton" },
+    { date: "2026-03-22", desc: "Badminton",                            amount: 210,  type: "debit",  category: "badminton" },
+    { date: "2026-03-22", desc: "Rolls",                                amount: 60,   type: "debit",  category: "food" },
+    { date: "2026-03-22", desc: "Devansh adjustment",                   amount: 100,  type: "credit", category: "misc" },
+    { date: "2026-03-22", desc: "Bharat adjustment",                    amount: 170,  type: "credit", category: "misc" },
+    { date: "2026-03-28", desc: "Badminton",                            amount: 145,  type: "debit",  category: "badminton" },
+    { date: "2026-04-02", desc: "Badminton",                            amount: 140,  type: "debit",  category: "badminton" },
+    { date: "2026-04-03", desc: "Party split",                          amount: 100,  type: "debit",  category: "party" },
+    { date: "2026-04-05", desc: "Badminton",                            amount: 250,  type: "debit",  category: "badminton" },
+    { date: "2026-04-04", desc: "Payment",                              amount: 1100, type: "credit", category: "payment" },
+    { date: "2026-04-11", desc: "Badminton",                            amount: 250,  type: "debit",  category: "badminton" },
+    { date: "2026-05-08", desc: "PDKP Badminton",                       amount: 170,  type: "debit",  category: "badminton" },
+    { date: "2026-05-16", desc: "PDKP Badminton",                       amount: 215,  type: "debit",  category: "badminton" },
+    { date: "2026-05-16", desc: "Hooga House settlement",               amount: 635,  type: "credit", category: "payment" },
+    { date: "2026-05-23", desc: "PDKP Badminton",                       amount: 200,  type: "debit",  category: "badminton" },
+    { date: "2026-05-31", desc: "Bunta settlement",                     amount: 160,  type: "credit", category: "payment" },
+  ],
+
+  Saloni: [
+    { date: "2026-03-12", desc: "Badminton",                            amount: 150,  type: "debit",  category: "badminton" },
+    { date: "2026-03-18", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-03-18", desc: "Juice",                                amount: 60,   type: "credit", category: "juice" },
+    { date: "2026-03-20", desc: "Badminton",                            amount: 225,  type: "debit",  category: "badminton" },
+    { date: "2026-03-22", desc: "Badminton",                            amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-03-22", desc: "New Year Due",                         amount: 430,  type: "debit",  category: "misc" },
+    { date: "2026-03-23", desc: "Badminton",                            amount: 225,  type: "debit",  category: "badminton" },
+    { date: "2026-03-24", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-03-27", desc: "Aman + Saloni badminton",              amount: 180,  type: "debit",  category: "badminton" },
+    { date: "2026-03-27", desc: "Bharat cake",                          amount: 160,  type: "debit",  category: "gift" },
+    { date: "2026-03-31", desc: "Badminton",                            amount: 160,  type: "debit",  category: "badminton" },
+    { date: "2026-03-31", desc: "Juice",                                amount: 40,   type: "debit",  category: "juice" },
+    { date: "2026-04-01", desc: "Payment",                              amount: 1000, type: "credit", category: "payment" },
+    { date: "2026-04-02", desc: "Badminton",                            amount: 140,  type: "debit",  category: "badminton" },
+    { date: "2026-04-03", desc: "Party overhead",                       amount: 120,  type: "debit",  category: "party" },
+    { date: "2026-04-18", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-04-18", desc: "Vansh house",                          amount: 275,  type: "debit",  category: "misc" },
+    { date: "2026-04-22", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-04-22", desc: "Juice",                                amount: 40,   type: "debit",  category: "juice" },
+    { date: "2026-04-27", desc: "Payment",                              amount: 1000, type: "credit", category: "payment" },
+    { date: "2026-04-28", desc: "Badminton",                            amount: 240,  type: "debit",  category: "badminton" },
+    { date: "2026-05-01", desc: "Badminton + Chhole Bhature",           amount: 440,  type: "debit",  category: "badminton" },
+    { date: "2026-05-06", desc: "Aman + Saloni badminton",              amount: 320,  type: "debit",  category: "badminton" },
+    { date: "2026-05-06", desc: "Juice",                                amount: 40,   type: "debit",  category: "juice" },
+    { date: "2026-05-12", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-05-12", desc: "Juice",                                amount: 60,   type: "debit",  category: "juice" },
+    { date: "2026-05-16", desc: "PDKP Badminton",                       amount: 220,  type: "debit",  category: "badminton" },
+    { date: "2026-05-16", desc: "Bunta",                                amount: 50,   type: "debit",  category: "juice" },
+    { date: "2026-05-23", desc: "PDKP Badminton",                       amount: 200,  type: "debit",  category: "badminton" },
+    { date: "2026-05-27", desc: "Bunta",                                amount: 50,   type: "debit",  category: "juice" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+  ],
+
+  Devansh: [
+    { date: "2026-03-20", desc: "Badminton",                            amount: 75,   type: "debit",  category: "badminton" },
+    { date: "2026-03-22", desc: "Badminton",                            amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-03-22", desc: "Priyam adjustment",                    amount: 100,  type: "debit",  category: "misc" },
+    { date: "2026-03-22", desc: "Bharat cake",                          amount: 160,  type: "debit",  category: "gift" },
+    { date: "2026-03-28", desc: "Badminton",                            amount: 145,  type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "10–11 AM badminton",                   amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "Rolls",                                amount: 150,  type: "debit",  category: "food" },
+    { date: "2026-03-28", desc: "Returned to you (Paytm)",              amount: 300,  type: "debit",  category: "misc" },
+    { date: "2026-03-28", desc: "Paid cash",                            amount: 1100, type: "credit", category: "payment" },
+    { date: "2026-04-02", desc: "Badminton",                            amount: 150,  type: "debit",  category: "badminton" },
+    { date: "2026-04-05", desc: "Badminton",                            amount: 250,  type: "debit",  category: "badminton" },
+    { date: "2026-04-03", desc: "Party split",                          amount: 100,  type: "debit",  category: "party" },
+    { date: "2026-04-03", desc: "Payment",                              amount: 500,  type: "credit", category: "payment" },
+    { date: "2026-04-11", desc: "Badminton",                            amount: 250,  type: "debit",  category: "badminton" },
+    { date: "2026-04-11", desc: "Payment",                              amount: 250,  type: "credit", category: "payment" },
+    { date: "2026-04-18", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-05-01", desc: "Badminton + Chhole Bhature",           amount: 660,  type: "debit",  category: "badminton" },
+    { date: "2026-05-01", desc: "Payment",                              amount: 500,  type: "credit", category: "payment" },
+    { date: "2026-05-06", desc: "Juice 1",                              amount: 40,   type: "debit",  category: "juice" },
+    { date: "2026-05-06", desc: "Juice 2",                              amount: 30,   type: "debit",  category: "juice" },
+    { date: "2026-05-06", desc: "Badminton",                            amount: 150,  type: "debit",  category: "badminton" },
+    { date: "2026-05-06", desc: "Payment",                              amount: 500,  type: "credit", category: "payment" },
+    { date: "2026-05-08", desc: "PDKP Badminton",                       amount: 170,  type: "debit",  category: "badminton" },
+    { date: "2026-05-23", desc: "PDKP Badminton",                       amount: 200,  type: "debit",  category: "badminton" },
+    { date: "2026-05-25", desc: "Payment",                              amount: 370,  type: "credit", category: "payment" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+  ],
+
+  Khushi: [
+    { date: "2026-03-24", desc: "Badminton",                            amount: 110,  type: "debit",  category: "badminton" },
+    { date: "2026-03-27", desc: "Badminton",                            amount: 90,   type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "Badminton",                            amount: 145,  type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "10–11 AM badminton",                   amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-04-02", desc: "Badminton",                            amount: 140,  type: "debit",  category: "badminton" },
+    { date: "2026-04-03", desc: "Party split",                          amount: 80,   type: "debit",  category: "party" },
+    { date: "2026-04-03", desc: "Payment",                              amount: 650,  type: "credit", category: "payment" },
+    { date: "2026-04-22", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-04-22", desc: "Juice",                                amount: 50,   type: "debit",  category: "juice" },
+    { date: "2026-05-01", desc: "Badminton",                            amount: 130,  type: "debit",  category: "badminton" },
+    { date: "2026-05-06", desc: "Settlement",                           amount: 300,  type: "credit", category: "payment" },
+    { date: "2026-05-06", desc: "Juice",                                amount: 60,   type: "debit",  category: "juice" },
+    { date: "2026-05-06", desc: "Badminton",                            amount: 160,  type: "debit",  category: "badminton" },
+    { date: "2026-05-12", desc: "Badminton",                            amount: 150,  type: "debit",  category: "badminton" },
+    { date: "2026-05-12", desc: "Juice",                                amount: 60,   type: "debit",  category: "juice" },
+    { date: "2026-05-16", desc: "PDKP Badminton",                       amount: 210,  type: "debit",  category: "badminton" },
+    { date: "2026-05-16", desc: "Hooga House",                          amount: 625,  type: "debit",  category: "misc" },
+    { date: "2026-05-23", desc: "PDKP Badminton",                       amount: 200,  type: "debit",  category: "badminton" },
+    { date: "2026-05-29", desc: "Badminton",                            amount: 135,  type: "debit",  category: "badminton" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+    { date: "2026-05-31", desc: "McDonald's adjustment",                amount: 300,  type: "credit", category: "payment" },
+    { date: "2026-05-31", desc: "Bunta",                                amount: 40,   type: "debit",  category: "juice" },
+  ],
+
+  Bharat: [
+    { date: "2026-03-24", desc: "Badminton",                            amount: 110,  type: "debit",  category: "badminton" },
+    { date: "2026-03-27", desc: "Morning badminton",                    amount: 90,   type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "Badminton",                            amount: 145,  type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "10–11 AM badminton",                   amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "Rolls",                                amount: 150,  type: "debit",  category: "food" },
+    { date: "2026-03-31", desc: "Badminton",                            amount: 170,  type: "debit",  category: "badminton" },
+    { date: "2026-03-31", desc: "Juice",                                amount: 40,   type: "debit",  category: "juice" },
+    { date: "2026-04-02", desc: "Badminton",                            amount: 140,  type: "debit",  category: "badminton" },
+    { date: "2026-04-03", desc: "Party split",                          amount: 2070, type: "debit",  category: "party" },
+    { date: "2026-04-05", desc: "Badminton",                            amount: 250,  type: "debit",  category: "badminton" },
+    { date: "2026-04-05", desc: "Cash payment",                         amount: 2000, type: "credit", category: "payment" },
+    { date: "2026-04-05", desc: "Penalty",                              amount: 100,  type: "credit", category: "penalty" },
+    { date: "2026-04-11", desc: "Badminton",                            amount: 250,  type: "debit",  category: "badminton" },
+    { date: "2026-04-11", desc: "Payment",                              amount: 1400, type: "credit", category: "payment" },
+    { date: "2026-04-12", desc: "Bowling + Pizza",                      amount: 345,  type: "debit",  category: "food" },
+    { date: "2026-04-12", desc: "Payment",                              amount: 345,  type: "credit", category: "payment" },
+    { date: "2026-04-18", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-04-22", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-04-22", desc: "Juice",                                amount: 50,   type: "debit",  category: "juice" },
+    { date: "2026-04-28", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-05-01", desc: "Badminton + Chhole Bhature",           amount: 280,  type: "debit",  category: "badminton" },
+    { date: "2026-05-06", desc: "Juice",                                amount: 60,   type: "debit",  category: "juice" },
+    { date: "2026-05-06", desc: "Badminton",                            amount: 150,  type: "debit",  category: "badminton" },
+    { date: "2026-05-08", desc: "PDKP Badminton",                       amount: 170,  type: "debit",  category: "badminton" },
+    { date: "2026-05-12", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-05-12", desc: "Juice",                                amount: 50,   type: "debit",  category: "juice" },
+    { date: "2026-05-16", desc: "PDKP Badminton",                       amount: 210,  type: "debit",  category: "badminton" },
+    { date: "2026-05-16", desc: "Hooga House split",                    amount: 825,  type: "debit",  category: "misc" },
+    { date: "2026-05-13", desc: "Cash payment",                         amount: 1500, type: "credit", category: "payment" },
+    { date: "2026-05-16", desc: "Hooga House settlement",               amount: 210,  type: "credit", category: "payment" },
+    { date: "2026-05-23", desc: "PDKP Badminton",                       amount: 205,  type: "debit",  category: "badminton" },
+    { date: "2026-05-27", desc: "Bunta",                                amount: 55,   type: "debit",  category: "juice" },
+    { date: "2026-05-29", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+    { date: "2026-05-31", desc: "Bunta",                                amount: 40,   type: "debit",  category: "juice" },
+  ],
+
+  Vansh: [
+    { date: "2026-03-28", desc: "Badminton",                            amount: 145,  type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "10–11 AM badminton",                   amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "Rolls",                                amount: 150,  type: "debit",  category: "food" },
+    { date: "2026-04-12", desc: "Contribution",                         amount: 120,  type: "debit",  category: "misc" },
+    { date: "2026-04-12", desc: "Payment",                              amount: 500,  type: "credit", category: "payment" },
+  ],
+
+  Chehak: [
+    { date: "2026-03-28", desc: "Badminton",                            amount: 145,  type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "10–11 AM badminton",                   amount: 85,   type: "debit",  category: "badminton" },
+    { date: "2026-03-28", desc: "Rolls",                                amount: 150,  type: "debit",  category: "food" },
+    { date: "2026-04-02", desc: "Badminton",                            amount: 140,  type: "debit",  category: "badminton" },
+    { date: "2026-04-03", desc: "Party split",                          amount: 80,   type: "debit",  category: "party" },
+    { date: "2026-04-04", desc: "Payment",                              amount: 600,  type: "credit", category: "payment" },
+    { date: "2026-05-16", desc: "Hooga House",                          amount: 450,  type: "debit",  category: "misc" },
+    { date: "2026-05-25", desc: "Payment",                              amount: 450,  type: "credit", category: "payment" },
+    { date: "2026-05-27", desc: "Bunta",                                amount: 50,   type: "debit",  category: "juice" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+    { date: "2026-05-31", desc: "Bunta",                                amount: 40,   type: "debit",  category: "juice" },
+  ],
+
+  Ashutosh: [],
+
+  Aditi: [
+    { date: "2026-04-03", desc: "Party share",                          amount: 200,  type: "debit",  category: "party" },
+    { date: "2026-04-10", desc: "Payment",                              amount: 200,  type: "credit", category: "payment" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+  ],
+
+  Kirtan: [
+    { date: "2026-04-03", desc: "Party share",                          amount: 200,  type: "debit",  category: "party" },
+    { date: "2026-04-06", desc: "Payment",                              amount: 200,  type: "credit", category: "payment" },
+    { date: "2026-05-10", desc: "Temporary loan",                       amount: 4000, type: "debit",  category: "misc" },
+    { date: "2026-05-10", desc: "Returned same day",                    amount: 4000, type: "credit", category: "payment" },
+    { date: "2026-05-16", desc: "Hooga House",                          amount: 610,  type: "debit",  category: "misc" },
+    { date: "2026-05-31", desc: "Priyam gift + cake",                   amount: 180,  type: "debit",  category: "gift" },
+  ],
+
+  Samarth: [
+    { date: "2026-03-13", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-03-17", desc: "Badminton",                            amount: 110,  type: "debit",  category: "badminton" },
+    { date: "2026-03-26", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-04-04", desc: "Payment",                              amount: 350,  type: "credit", category: "payment" },
+    { date: "2026-04-14", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-04-26", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-05-01", desc: "Badminton",                            amount: 140,  type: "debit",  category: "badminton" },
+    { date: "2026-05-01", desc: "Momo",                                 amount: 35,   type: "debit",  category: "food" },
+    { date: "2026-05-08", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-05-17", desc: "Badminton",                            amount: 125,  type: "debit",  category: "badminton" },
+    { date: "2026-05-17", desc: "Yonex Shuttle Box",                    amount: 250,  type: "debit",  category: "misc" },
+    { date: "2026-05-17", desc: "Discount applied",                     amount: 115,  type: "credit", category: "misc" },
+    { date: "2026-05-17", desc: "Payment",                              amount: 800,  type: "credit", category: "payment" },
+    { date: "2026-05-24", desc: "Badminton",                            amount: 100,  type: "debit",  category: "badminton" },
+    { date: "2026-05-29", desc: "Badminton",                            amount: 115,  type: "debit",  category: "badminton" },
+  ],
+
+  Anni: [
+    { date: "2026-03-13", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+    { date: "2026-04-05", desc: "Payment",                              amount: 120,  type: "credit", category: "payment" },
+    { date: "2026-04-14", desc: "Badminton",                            amount: 120,  type: "debit",  category: "badminton" },
+  ],
+};
+
+export async function seedFirebase() {
+  const updates = {};
+
+  for (const [name, entries] of Object.entries(SEED_DATA)) {
+    updates[`people/${name}/color`] = PEOPLE_COLORS[name];
+    updates[`people/${name}/name`]  = name;
+
+    entries.forEach((entry, i) => {
+      const key = `entry_${new Date(entry.date).getTime()}_${String(i).padStart(3, "0")}`;
+      updates[`people/${name}/entries/${key}`] = {
+        ...entry,
+        createdAt: new Date(entry.date).getTime(),
+        id: key,
+      };
+    });
+  }
+
+  await update(ref(db, "/"), updates);
+  console.log("✅ Firebase seeded successfully!");
+}
