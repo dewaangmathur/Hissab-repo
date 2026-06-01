@@ -351,7 +351,7 @@ function PersonDetail({name,data,onBack}) {
     if (!screenshotRef.current) return;
     const el=screenshotRef.current;
     const canvas=await html2canvas(el,{
-      backgroundColor:"#080810",scale:2,useCORS:true,
+      backgroundColor:"#080810",scale:4,useCORS:true,
       width:el.scrollWidth,height:el.scrollHeight,
       windowWidth:el.scrollWidth,windowHeight:el.scrollHeight,
     });
